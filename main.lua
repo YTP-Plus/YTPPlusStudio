@@ -24,10 +24,6 @@ function love.load()
 		TextEntry = "",
 		TextNum = false
 	}
-	Prefix = love.filesystem.getSaveDirectory()
-	if love.system.getOS() == "Windows" then
-		Prefix = ""
-	end
 	love.window.setMode( Enums.Width*Data.Scaling, Enums.Height*Data.Scaling, Enums.WindowFlags )
 	love.mouse.setCursor( Graphics.Cursor )
 	if Data.BootType < Enums.BootNoAudio then
@@ -658,8 +654,8 @@ function Render()
 				end
 			end
 			love.filesystem.write("videos.txt", writeto)
-			local cwd = Prefix
-			if Prefix == "" then
+			local cwd = love.filesystem.getSaveDirectory()
+			if love.system.getOS() == "Windows" then
 				cwd = love.filesystem.getWorkingDirectory()
 			end
 			os.execute("node "..cwd.."/YTPPlusCLI/index.js --skip=true --width="..Data.Generate.Width.." --height="..Data.Generate.Height.." --fps="..Data.Generate.FPS.." --input="..love.filesystem.getSaveDirectory().."/videos.txt --output="..Data.Generate.Output.." --clips="..Data.Generate.Clips.." --minstream="..Data.Generate.MinStream.." --maxstream="..Data.Generate.MaxStream.." --usetransitions="..Enums.BoolString[Data.Generate.Transitions])
@@ -703,22 +699,20 @@ function promptnotimplemented()
 	Main.Prompt = prompt
 end
 function promptytpcli()
-	local info = love.filesystem.getInfo(Prefix.."/YTPPlusCLI")
+	local info = love.filesystem.getInfo("/YTPPlusCLI")
 	if not info then --does not exist
 		Audio.Prompt:play()
 		local prompt = {}
 		prompt.Title = "ytp+ cli wasn't found"
-		prompt.Line1 = "ytp+ cli was not detected in this directory."
-		prompt.Line2 = "please re-install at ytp-plus.github.io"
-		prompt.Line3 = "for mac/linux users, please read readme.md."
-		prompt.Line4 = ""
-		prompt.Line5 = "install it?"
-		prompt.Choice1 = "yes"
-		prompt.Callback1 = function()
-			love.system.openURL("install.bat")
-		end
+		prompt.Line1 = ""
+		prompt.Line2 = "ytp+ cli was not detected properly."
+		prompt.Line3 = "please re-install at ytp-plus.github.io"
+		prompt.Line4 = "windows installation may differ."
+		prompt.Line5 = ""
+		prompt.Choice1 = ""
+		prompt.Callback1 = function() end
 		prompt.Callback2 = function() end
-		prompt.Choice2 = "no"
+		prompt.Choice2 = "okay"
 		prompt.Y = -240
 		prompt.State = Enums.PromptOpen
 		Main.Prompt = prompt
