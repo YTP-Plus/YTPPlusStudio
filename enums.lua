@@ -14,8 +14,6 @@ return {
         fullscreentype = "desktop",
         vsync = 1,
         msaa = 0,
-        stencil = true,
-        depth = 0,
         resizable = false,
         borderless = false,
         centered = true,

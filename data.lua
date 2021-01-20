@@ -27,8 +27,7 @@ local data = {
         Sources = {}
     }
 }
-local info = love.filesystem.getInfo("settings.txt")
-if not info then --does not exist
+if not love.filesystem.exists("settings.txt") then --does not exist
     love.filesystem.write("settings.txt", "{}")
 end
 local unpack = TSerial.unpack(love.filesystem.read("settings.txt"), true)

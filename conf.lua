@@ -5,8 +5,7 @@ function love.conf(t)
     local path = love.filesystem.getSource()
     local cli = ""
     love.filesystem.mount(love.filesystem.getSourceBaseDirectory(), "")
-    local info = love.filesystem.getInfo("YTPPlusCLI")
-	if info then --does not exist
+	if love.filesystem.exists("YTPPlusCLI") then --does not exist
         cli = "[cli v"..love.filesystem.read("YTPPlusCLI/version.txt").."]"
     end
     if string.find(path, ".love") or string.find(path, ".exe") then
