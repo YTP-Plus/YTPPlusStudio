@@ -658,7 +658,7 @@ function Render()
 			if love.system.getOS() == "Windows" then
 				cwd = love.filesystem.getWorkingDirectory()
 			end
-			os.execute("node "..cwd.."/YTPPlusCLI/index.js --skip=true --width="..Data.Generate.Width.." --height="..Data.Generate.Height.." --fps="..Data.Generate.FPS.." --input="..love.filesystem.getSaveDirectory().."/videos.txt --output="..Data.Generate.Output.." --clips="..Data.Generate.Clips.." --minstream="..Data.Generate.MinStream.." --maxstream="..Data.Generate.MaxStream.." --usetransitions="..Enums.BoolString[Data.Generate.Transitions])
+			os.execute("node \""..cwd.."/YTPPlusCLI/index.js\" --skip=true --width="..Data.Generate.Width.." --height="..Data.Generate.Height.." --fps="..Data.Generate.FPS.." --input=\""..love.filesystem.getSaveDirectory().."/videos.txt\" --output=\""..Data.Generate.Output.."\" --clips="..Data.Generate.Clips.." --minstream="..Data.Generate.MinStream.." --maxstream="..Data.Generate.MaxStream.." --usetransitions="..Enums.BoolString[Data.Generate.Transitions])
 			love.system.openURL(Data.Generate.Output)
 		end
 		prompt.Callback2 = function() end
