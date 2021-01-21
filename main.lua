@@ -29,7 +29,7 @@ function love.load()
 	if Data.BootType < Enums.BootNoAudio then
 		Audio.Boot:play()
 	elseif Data.BootType >= Enums.BootNone then
-		Main.Boot = 1
+		Main.Boot = 255
 	end
 	love.audio.setVolume(Data.Volume)
 	love.keyboard.setKeyRepeat(true)
@@ -40,11 +40,11 @@ function love.draw()
 	love.graphics.setCanvas(Canvas) --This sets the draw target to the canvas
 	love.graphics.clear()
 	if Data.BackgroundType < Enums.BackgroundBlack then
-		love.graphics.setBackgroundColor(0.25,0.25,0.25,Main.Boot) --#404040
+		love.graphics.setBackgroundColor(64,64,64,Main.Boot) --#404040
 	end
 	--tiled background
 	if Data.BackgroundType < Enums.BackgroundNone then
-		love.graphics.setColor(0.4,0.4,0.4)
+		love.graphics.setColor(102,102,102)
 		love.graphics.draw(Graphics.Tiles, Graphics.TiledQuad, Main.X - Enums.BackgroundSize, Main.Y - Enums.BackgroundSize) --bottom left corner
 		love.graphics.draw(Graphics.Tiles, Graphics.TiledQuad, Main.X + Enums.BackgroundSize, Main.Y + Enums.BackgroundSize) --top right corner
 		love.graphics.draw(Graphics.Tiles, Graphics.TiledQuad, Main.X + Enums.BackgroundSize, Main.Y - Enums.BackgroundSize) --bottom left corner
@@ -54,7 +54,7 @@ function love.draw()
 	love.graphics.setColor(0,0,0,Main.Boot)
 	love.graphics.rectangle("fill",2,2,Enums.Width-4,17) --title bar
 	--these are all parameters for the border around the screen:
-	love.graphics.setColor(0.5,0.5,0.5,Main.Boot)
+	love.graphics.setColor(128,128,128,Main.Boot)
 	love.graphics.rectangle("fill",0,0,2,Enums.Height)
 	love.graphics.rectangle("fill",Enums.Width-2,0,2,Enums.Height)
 	love.graphics.rectangle("fill",1,0,Enums.Width-2,2)
@@ -62,19 +62,19 @@ function love.draw()
 	--end border
 	if Main.ActiveScreen ~= Enums.Menu then
 		--header
-		love.graphics.setColor(1,1,1) --#FFFFFF
+		love.graphics.setColor(255,255,255) --#FFFFFF
 		love.graphics.setFont(Graphics.Munro.Regular)
 		love.graphics.printf(Enums.ScreenNames[Main.ActiveScreen], 0, 6-3, Enums.Width, "center")
 		--back button
-		love.graphics.setColor(0.5,0.5,0.5)
+		love.graphics.setColor(128,128,128)
 		love.graphics.rectangle("fill",2,2,17,17)
-		love.graphics.setColor(1,1,1)
+		love.graphics.setColor(255,255,255)
 		love.graphics.draw(Graphics.Back,2,2)
 		--end back button
 		--draw screen types
 		if Main.ActiveScreen == Enums.Generate then
 			--mid divider
-			love.graphics.setColor(0.5,0.5,0.5)
+			love.graphics.setColor(128,128,128)
 			love.graphics.rectangle("fill",159,128,2,108)
 			--render button
 			love.graphics.rectangle("fill",248,2,70,17)
@@ -89,7 +89,7 @@ function love.draw()
 			--shadows right
 			love.graphics.print("fps:",168,165-2)
 			--white color
-			love.graphics.setColor(1,1,1)
+			love.graphics.setColor(255,255,255)
 			love.graphics.draw(Graphics.Generate.ImportBG,4,21)
 			love.graphics.draw(Graphics.Generate.Up,4,112)
 			love.graphics.draw(Graphics.Generate.Down,17,112)
@@ -165,7 +165,7 @@ function love.draw()
 			love.graphics.print(Data.Generate.PluginTest,219,131-2)
 			love.graphics.print(Data.Generate.GlobalPlugin,226,148-2)
 			--modifiers
-			love.graphics.setColor(1,1,1)
+			love.graphics.setColor(255,255,255)
 			love.graphics.print(Data.Generate.Output,43,131-3)
 			love.graphics.print(Data.Generate.PluginTest,218,131-3)
 			love.graphics.print(Data.Generate.GlobalPlugin,225,148-3)
@@ -186,32 +186,32 @@ function love.draw()
 				love.graphics.print("x",306,148-3)
 			end
 		elseif Main.ActiveScreen >= Enums.LastScreen and Main.ActiveScreen < Enums.TotalScreens+1 and Data.Generate[Main.TextEntry] ~= nil then --text entry screens
-			love.graphics.setColor(0.5,0.5,0.5)
+			love.graphics.setColor(128,128,128)
 			love.graphics.rectangle("fill",294,2,24,17)
-			love.graphics.setColor(1,1,1)
+			love.graphics.setColor(255,255,255)
 			love.graphics.print("enter",296,6-3)
 			love.graphics.draw(Graphics.Generate.Dividers.Import,8,127)
 			love.graphics.printf(Main.OldTextBuffer, 0, 116-3, Enums.Width, "center")
 		end
 	else --menu
 		--header
-		love.graphics.setColor(1,1,1,Main.Boot) --white with boot sequence as its transparency
+		love.graphics.setColor(255,255,255,Main.Boot) --white with boot sequence as its transparency
 		love.graphics.draw(Graphics.Icon, 129+Graphics.Icon:getWidth()/2,4+Graphics.Icon:getHeight()/2, Main.Flip, 1, 1, Graphics.Icon:getWidth()/2, Graphics.Icon:getHeight()/2) --this icon is positioned by its center and rotates that way
 		love.graphics.setFont(Graphics.Munro.Regular)
 		love.graphics.print("ytp+ studio",146,6-3) --minus 3 due to font scaling
 		--buttons
 		love.graphics.setColor(0,0,0,Main.Boot)
 		love.graphics.print("generate\n\nplugins (not yet available)\n\noptions\n\nquit",23,90-3) --shadow
-		love.graphics.setColor(1,1,1,Main.Boot)
+		love.graphics.setColor(255,255,255,Main.Boot)
 		love.graphics.print("generate\n\nplugins (not yet available)\n\noptions\n\nquit",22,89-3) --main menu, not centered, \n means new line
 	end
 	--fading
-	local color = 1
+	local color = 255
 	local fadet = Main.ScreenWait
 	if Data.FadeType == Enums.FadeBlack then
 		color = 0
 	elseif Data.FadeType >= Enums.FadeNone then
-		Main.ScreenWait = 1 --stop the timer
+		Main.ScreenWait = 255 --stop the timer
 		fadet = 0
 	end
 	love.graphics.setColor(color,color,color,fadet)
@@ -223,14 +223,14 @@ function love.draw()
 	]]
 	--prompts
 	if Main.Prompt ~= nil then
-		love.graphics.setColor(0,0,0,0.5)
+		love.graphics.setColor(0,0,0,128)
 		love.graphics.rectangle("fill",0,0,Enums.Width,Enums.Height)
-		love.graphics.setColor(1,1,1)
+		love.graphics.setColor(255,255,255)
 		love.graphics.draw(Graphics.Prompt,46+Graphics.Prompt:getWidth()/2,Main.Prompt.Y+Graphics.Prompt:getWidth()/2, 0, 1, 1, Graphics.Prompt:getWidth()/2, Graphics.Prompt:getHeight()/2)
 		if Main.Prompt.Choice1 ~= "" then
 			love.graphics.draw(Graphics.Choice,50+Graphics.Choice:getWidth()/2,Main.Prompt.Y+135+Graphics.Choice:getHeight()/2, 0, 1, 1, Graphics.Choice:getWidth()/2, Graphics.Choice:getHeight()/2)
 		end
-		love.graphics.setColor(1,1,1)
+		love.graphics.setColor(255,255,255)
 		--description
 		love.graphics.printf(Main.Prompt.Line1, 0, Main.Prompt.Y+66-3, Enums.Width, "center")
 		love.graphics.printf(Main.Prompt.Line2, 0, Main.Prompt.Y+78-3, Enums.Width, "center")
@@ -243,10 +243,10 @@ function love.draw()
 		--title
 		love.graphics.printf(Main.Prompt.Title, 0, Main.Prompt.Y+41-3, Enums.Width, "center")
 	end
-	love.graphics.setColor(1,1,1)
+	love.graphics.setColor(255,255,255)
 	--end prompts
 	love.graphics.setCanvas() --This sets the target back to the screen
-	love.graphics.setColor(1,1,1,Main.Boot) --#FFFFFF
+	love.graphics.setColor(255,255,255,Main.Boot) --#FFFFFF
 	love.graphics.draw(Canvas, 0, 0, 0, Data.Scaling, Data.Scaling)
 end
 function love.update(dt)
@@ -275,12 +275,12 @@ function love.update(dt)
 			end
 		end
 	end
-	if Main.Boot < 1 then --boot sequence
-		Main.Boot = Main.Boot + 0.005 --despacito
+	if Main.Boot < 255 then --boot sequence
+		Main.Boot = Main.Boot + 1 --despacito
 	end
 	--screen change fading
-	if Main.Fade == Enums.FadeOut and Main.ScreenWait < 1 then --fade to white
-		Main.ScreenWait = Main.ScreenWait + 0.1
+	if Main.Fade == Enums.FadeOut and Main.ScreenWait < 255 then --fade to white
+		Main.ScreenWait = Main.ScreenWait + 25
 	elseif Main.Fade == Enums.FadeOut then --begin fade in and change to new screen
 		Main.Fade = Enums.FadeIn
 		Main.LastScreen = Main.ActiveScreen
@@ -293,7 +293,7 @@ function love.update(dt)
 		end
 	end
 	if Main.Fade == Enums.FadeIn and Main.ScreenWait > 0 then --fade out from white into new screen
-		Main.ScreenWait = Main.ScreenWait - 0.1
+		Main.ScreenWait = Main.ScreenWait - 25
 	elseif Main.Fade == Enums.FadeIn then --fade over
 		Main.ScreenWait = 0
 		Main.Fade = Enums.FadeNone
@@ -318,7 +318,7 @@ function love.update(dt)
 	if Main.Y >= Enums.BackgroundSize then Main.Y = 0 end --ditto with y
 end
 function love.mousepressed( x, y, button, istouch, presses )
-	Main.Boot = 1 --disable boot sequence
+	Main.Boot = 255 --disable boot sequence
 	x = x/Data.Scaling --scale up mouse x
 	y = y/Data.Scaling --ditto with y
 	love.audio.stop()
@@ -699,8 +699,7 @@ function promptnotimplemented()
 	Main.Prompt = prompt
 end
 function promptytpcli()
-	local info = love.filesystem.getInfo("/YTPPlusCLI")
-	if not info then --does not exist
+	if not love.filesystem.exists("/YTPPlusCLI") then --does not exist
 		Audio.Prompt:play()
 		local prompt = {}
 		prompt.Title = "ytp+ cli wasn't found"
