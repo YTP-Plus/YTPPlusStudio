@@ -21,7 +21,6 @@ return {
         Remove = love.graphics.newImage( "graphics/generate/remove.png" ),
         Up = love.graphics.newImage( "graphics/generate/up.png" ),
         Dividers = {
-            GlobalPlugin = love.graphics.newImage( "graphics/generate/globalplugindivider.png" ),
             PluginTest = love.graphics.newImage( "graphics/generate/plugintestdivider.png" ),
             Import = love.graphics.newImage( "graphics/generate/importdivider.png" ),
             Output = love.graphics.newImage( "graphics/generate/outputdivider.png" )
@@ -29,9 +28,12 @@ return {
         Buttons = {
             Checkbox = love.graphics.newImage( "graphics/generate/checkbox.png" ),
             InputField = love.graphics.newImage( "graphics/generate/inputfield.png" ),
-            GlobalPlugin = love.graphics.newImage( "graphics/generate/globalpluginopen.png" ),
+            Transitions = love.graphics.newImage( "graphics/generate/transitionsopen.png" ),
             PluginTest = love.graphics.newImage( "graphics/generate/plugintestopen.png" ),
             Output = love.graphics.newImage( "graphics/generate/outputopen.png" )
         }
+    },
+    Transitions = {
+        TransitionsBG = love.graphics.newImage( "graphics/transitions/transitionsbg.png" ),
     }
 }

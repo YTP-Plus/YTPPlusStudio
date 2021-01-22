@@ -1,8 +1,8 @@
 return {
     Version = {
-        Major = 0,
-        Minor = 1,
-        Patch = 3,
+        Major = 1,
+        Minor = 0,
+        Patch = 0,
         Label = nil,
         Candidate = 0
     },
@@ -42,9 +42,11 @@ return {
     TextWidth = 8,
     TextHeight = 9,
     TextPluginTest = 10,
-    TextGlobalPlugin = 11,
+    TextTransitions = 11,
     TextFPS = 12,
-    TotalScreens = 12, --count of all screens in total
+    --hidden screens
+    Transitions = 13,
+    TotalScreens = 13, --count of all screens in total
     ScreenNames = {
         [0] = "main menu",
         "generate",
@@ -57,8 +59,9 @@ return {
         "text entry - width",
         "text entry - height",
         "text entry - plugin test",
-        "text entry - global plugin",
-        "text entry - fps"
+        "text entry - transitions",
+        "text entry - fps",
+        "transitions"
     },
     --prompt states
     PromptOpen = 0,

@@ -8,6 +8,7 @@ function love.load()
 	Canvas:setFilter("nearest", "nearest")
 	Main = {
 		Cursor = 0,
+		TransitionCursor = 0,
 		Boot = 0,
 		LastScreen = Data.LastScreen,
 		ActiveScreen = Data.ActiveScreen,
@@ -80,7 +81,7 @@ function love.draw()
 			love.graphics.rectangle("fill",248,2,70,17)
 			--shadows left
 			love.graphics.setColor(0,0,0)
-			love.graphics.print("use transition clips:",9,148-2)
+			love.graphics.print("output debugging info:",9,148-2)
 			love.graphics.print("minimum stream duration:",9,165-2)
 			love.graphics.print("maximum stream duration:",9,182-2)
 			love.graphics.print("clip count:",9,199-2)
@@ -96,24 +97,23 @@ function love.draw()
 			love.graphics.print("render and open",250,6-3)
 			love.graphics.print((Main.Cursor+1).."-"..(Main.Cursor+6).."/"..#Data.Generate.Sources,30,115-3)
 			if #Data.Generate.Sources < 1 then
-				love.graphics.printf("(no sources, import *.mp4 files)", 0, 115-3, Enums.Width, "center")
+				love.graphics.printf("(no sources, import video files)", 0, 115-3, Enums.Width, "center")
 			else
 				love.graphics.printf("clear", 0, 115-3, Enums.Width, "center")
 			end
 			--dividers
 			love.graphics.draw(Graphics.Generate.Dividers.Output,43,142)
 			love.graphics.draw(Graphics.Generate.Dividers.PluginTest,218,142)
-			love.graphics.draw(Graphics.Generate.Dividers.GlobalPlugin,224,159)
 			--left buttons
 			love.graphics.draw(Graphics.Generate.Buttons.Output,4,128)
-			love.graphics.draw(Graphics.Generate.Buttons.Checkbox,88,145) --transitions
+			love.graphics.draw(Graphics.Generate.Buttons.Checkbox,102,145) --debugging
 			love.graphics.draw(Graphics.Generate.Buttons.InputField,120,162) --min stream
 			love.graphics.draw(Graphics.Generate.Buttons.InputField,124,179) --max stream
 			love.graphics.draw(Graphics.Generate.Buttons.InputField,50,196) --clip count
 			love.graphics.draw(Graphics.Generate.Buttons.InputField,52,213) --res width
 			love.graphics.draw(Graphics.Generate.Buttons.InputField,90,213) --res height
 			love.graphics.print("output:",8,131-3)
-			love.graphics.print("use transition clips:",8,148-3)
+			love.graphics.print("output debugging info:",8,148-3)
 			love.graphics.print("minimum stream duration:",8,165-3)
 			love.graphics.print("maximum stream duration:",8,182-3)
 			love.graphics.print("clip count:",8,199-3)
@@ -121,12 +121,12 @@ function love.draw()
 			love.graphics.print("x",83,216-3)
 			--right buttons
 			love.graphics.draw(Graphics.Generate.Buttons.PluginTest,163,128)
-			love.graphics.draw(Graphics.Generate.Buttons.GlobalPlugin,163,145)
+			love.graphics.draw(Graphics.Generate.Buttons.Transitions,163,145)
 			love.graphics.draw(Graphics.Generate.Buttons.Checkbox,301,128) --toggle plugin test
-			love.graphics.draw(Graphics.Generate.Buttons.Checkbox,301,145) --toggle global plugin
+			love.graphics.draw(Graphics.Generate.Buttons.Checkbox,218,145) --toggle transitions
 			love.graphics.draw(Graphics.Generate.Buttons.InputField,182,162) --fps
 			love.graphics.print("plugin test:",167,131-3)
-			love.graphics.print("global plugin:",167,148-3)
+			love.graphics.print("transitions:",167,148-3)
 			love.graphics.print("fps:",167,165-3)
 			--imports
 			if #Data.Generate.Sources >= 1 and Main.Cursor < #Data.Generate.Sources then
@@ -163,12 +163,10 @@ function love.draw()
 			love.graphics.setColor(0,0,0)
 			love.graphics.print(Data.Generate.Output,44,131-2)
 			love.graphics.print(Data.Generate.PluginTest,219,131-2)
-			love.graphics.print(Data.Generate.GlobalPlugin,226,148-2)
 			--modifiers
 			love.graphics.setColor(1,1,1)
 			love.graphics.print(Data.Generate.Output,43,131-3)
 			love.graphics.print(Data.Generate.PluginTest,218,131-3)
-			love.graphics.print(Data.Generate.GlobalPlugin,225,148-3)
 			love.graphics.print(Data.Generate.MinStream,124,166-3)
 			love.graphics.print(Data.Generate.MaxStream,128,183-3)
 			love.graphics.print(Data.Generate.Clips,54,200-3)
@@ -176,14 +174,14 @@ function love.draw()
 			love.graphics.print(Data.Generate.Height,94,217-3)
 			love.graphics.print(Data.Generate.FPS,186,166-3)
 			--checkmarks
-			if Data.Generate.Transitions then
-				love.graphics.print("x",93,148-3)
+			if Data.Generate.Debugging then
+				love.graphics.print("x",107,148-3)
 			end
 			if Data.Generate.PluginTestActive then
 				love.graphics.print("x",306,131-3)
 			end
-			if Data.Generate.GlobalPluginActive then
-				love.graphics.print("x",306,148-3)
+			if Data.Generate.TransitionsActive then
+				love.graphics.print("x",223,148-3)
 			end
 		elseif Main.ActiveScreen >= Enums.LastScreen and Main.ActiveScreen < Enums.TotalScreens+1 and Data.Generate[Main.TextEntry] ~= nil then --text entry screens
 			love.graphics.setColor(0.5,0.5,0.5)
@@ -192,6 +190,83 @@ function love.draw()
 			love.graphics.print("enter",296,6-3)
 			love.graphics.draw(Graphics.Generate.Dividers.Import,8,127)
 			love.graphics.printf(Main.OldTextBuffer, 0, 116-3, Enums.Width, "center")
+		elseif Main.ActiveScreen == Enums.Transitions then
+			love.graphics.setColor(1,1,1)
+			love.graphics.draw(Graphics.Transitions.TransitionsBG,4,21)
+			love.graphics.draw(Graphics.Generate.Up,4,222)
+			love.graphics.draw(Graphics.Generate.Down,17,222)
+			love.graphics.print((Main.TransitionCursor+1).."-"..(Main.TransitionCursor+13).."/"..#Data.Generate.Transitions,30,225-3)
+			if #Data.Generate.Transitions < 1 then
+				love.graphics.printf("(no transitions, import video files)", 0, 225-3, Enums.Width, "center")
+			else
+				love.graphics.printf("clear", 0, 224-3, Enums.Width, "center")
+			end
+			--imports
+			if #Data.Generate.Transitions >= 1 and Main.TransitionCursor < #Data.Generate.Transitions then
+				love.graphics.print(Data.Generate.Transitions[Main.TransitionCursor+1],8,25-3)
+				love.graphics.draw(Graphics.Generate.Remove,301,21)
+				love.graphics.draw(Graphics.Generate.Dividers.Import,8,36)
+			end
+			if #Data.Generate.Transitions >= 2 and Main.TransitionCursor+1 < #Data.Generate.Transitions then
+				love.graphics.print(Data.Generate.Transitions[Main.TransitionCursor+2],8,40-3)
+				love.graphics.draw(Graphics.Generate.Remove,301,36)
+				love.graphics.draw(Graphics.Generate.Dividers.Import,8,51)
+			end
+			if #Data.Generate.Transitions >= 3 and Main.TransitionCursor+2 < #Data.Generate.Transitions then
+				love.graphics.print(Data.Generate.Transitions[Main.TransitionCursor+3],8,55-3)
+				love.graphics.draw(Graphics.Generate.Remove,301,51)
+				love.graphics.draw(Graphics.Generate.Dividers.Import,8,66)
+			end
+			if #Data.Generate.Transitions >= 4 and Main.TransitionCursor+3 < #Data.Generate.Transitions then
+				love.graphics.print(Data.Generate.Transitions[Main.TransitionCursor+4],8,70-3)
+				love.graphics.draw(Graphics.Generate.Remove,301,66)
+				love.graphics.draw(Graphics.Generate.Dividers.Import,8,81)
+			end
+			if #Data.Generate.Transitions >= 5 and Main.TransitionCursor+4 < #Data.Generate.Transitions then
+				love.graphics.print(Data.Generate.Transitions[Main.TransitionCursor+5],8,85-3)
+				love.graphics.draw(Graphics.Generate.Remove,301,81)
+				love.graphics.draw(Graphics.Generate.Dividers.Import,8,96)
+			end
+			if #Data.Generate.Transitions >= 6 and Main.TransitionCursor+5 < #Data.Generate.Transitions then
+				love.graphics.print(Data.Generate.Transitions[Main.TransitionCursor+6],8,100-3)
+				love.graphics.draw(Graphics.Generate.Remove,301,96)
+				love.graphics.draw(Graphics.Generate.Dividers.Import,8,111)
+			end
+			if #Data.Generate.Transitions >= 7 and Main.TransitionCursor+6 < #Data.Generate.Transitions then
+				love.graphics.print(Data.Generate.Transitions[Main.TransitionCursor+7],8,115-3)
+				love.graphics.draw(Graphics.Generate.Remove,301,111)
+				love.graphics.draw(Graphics.Generate.Dividers.Import,8,126)
+			end
+			if #Data.Generate.Transitions >= 8 and Main.TransitionCursor+7 < #Data.Generate.Transitions then
+				love.graphics.print(Data.Generate.Transitions[Main.TransitionCursor+8],8,130-3)
+				love.graphics.draw(Graphics.Generate.Remove,301,126)
+				love.graphics.draw(Graphics.Generate.Dividers.Import,8,141)
+			end
+			if #Data.Generate.Transitions >= 9 and Main.TransitionCursor+8 < #Data.Generate.Transitions then
+				love.graphics.print(Data.Generate.Transitions[Main.TransitionCursor+9],8,145-3)
+				love.graphics.draw(Graphics.Generate.Remove,301,141)
+				love.graphics.draw(Graphics.Generate.Dividers.Import,8,156)
+			end
+			if #Data.Generate.Transitions >= 10 and Main.TransitionCursor+9 < #Data.Generate.Transitions then
+				love.graphics.print(Data.Generate.Transitions[Main.TransitionCursor+10],8,160-3)
+				love.graphics.draw(Graphics.Generate.Remove,301,156)
+				love.graphics.draw(Graphics.Generate.Dividers.Import,8,171)
+			end
+			if #Data.Generate.Transitions >= 11 and Main.TransitionCursor+10 < #Data.Generate.Transitions then
+				love.graphics.print(Data.Generate.Transitions[Main.TransitionCursor+11],8,175-3)
+				love.graphics.draw(Graphics.Generate.Remove,301,171)
+				love.graphics.draw(Graphics.Generate.Dividers.Import,8,186)
+			end
+			if #Data.Generate.Transitions >= 12 and Main.TransitionCursor+11 < #Data.Generate.Transitions then
+				love.graphics.print(Data.Generate.Transitions[Main.TransitionCursor+12],8,190-3)
+				love.graphics.draw(Graphics.Generate.Remove,301,186)
+				love.graphics.draw(Graphics.Generate.Dividers.Import,8,201)
+			end
+			if #Data.Generate.Transitions >= 13 and Main.TransitionCursor+12 < #Data.Generate.Transitions then
+				love.graphics.print(Data.Generate.Transitions[Main.TransitionCursor+13],8,205-3)
+				love.graphics.draw(Graphics.Generate.Remove,301,201)
+				love.graphics.draw(Graphics.Generate.Dividers.Import,8,216)
+			end
 		end
 	else --menu
 		--header
@@ -396,10 +471,9 @@ function love.mousepressed( x, y, button, istouch, presses )
 				Main.NextScreen = Enums.TextOutput
 				Main.Fade = Enums.FadeOut
 				Audio.Select:play()
-			elseif x >= 88 and y >= 144 and x < 103 and y < 159 then --transitions
-				--Data.Generate.Transitions = not Data.Generate.Transitions
-				--Audio.Option:play()
-				promptnotimplemented()
+			elseif x >= 102 and y >= 144 and x < 117 and y < 159 then --debugging
+				Data.Generate.Debugging = not Data.Generate.Debugging
+				Audio.Option:play()
 			elseif x >= 120 and y >= 161 and x < 149 and y < 176 then --min stream
 				Main.TextEntry = "MinStream"
 				Main.OldTextBuffer = Data.Generate[Main.TextEntry]
@@ -431,27 +505,21 @@ function love.mousepressed( x, y, button, istouch, presses )
 				Main.Fade = Enums.FadeOut
 				Audio.Select:play()
 			elseif x >= 163 and y >= 127 and x < 216 and y < 142 then --plugin test
-				--[[Main.TextEntry = "PluginTest"
+				Main.TextEntry = "PluginTest"
 				Main.OldTextBuffer = Data.Generate[Main.TextEntry]
 				Main.NextScreen = Enums.TextPluginTest
 				Main.Fade = Enums.FadeOut
-				Audio.Select:play()]]
-				promptnotimplemented()
+				Audio.Select:play()
 			elseif x >= 301 and y >= 127 and x < 316 and y < 142 then --plugin test active
-				promptnotimplemented()
-				--Data.Generate.PluginTestActive = not Data.Generate.PluginTestActive
-				--Audio.Option:play()
-			elseif x >= 163 and y >= 144 and x < 223 and y < 159 then --global plugin
-				--[[Main.TextEntry = "GlobalPlugin"
-				Main.OldTextBuffer = Data.Generate[Main.TextEntry]
-				Main.NextScreen = Enums.TextGlobalPlugin
+				Data.Generate.PluginTestActive = not Data.Generate.PluginTestActive
+				Audio.Option:play()
+			elseif x >= 163 and y >= 143 and x < 216 and y < 160 then --transitions
+				Main.NextScreen = Enums.Transitions
 				Main.Fade = Enums.FadeOut
-				Audio.Select:play()]]--
-				promptnotimplemented()
-			elseif x >= 301 and y >= 144 and x < 316 and y < 159 then --global plugin active
-				--Data.Generate.GlobalPluginActive = not Data.Generate.GlobalPluginActive
-				--Audio.Option:play()
-				promptnotimplemented()
+				Audio.Select:play()
+			elseif x >= 218 and y >= 144 and x < 233 and y < 159 then --transitions active
+				Data.Generate.TransitionsActive = not Data.Generate.TransitionsActive
+				Audio.Option:play()
 			elseif x >= 182 and y >= 161 and x < 211 and y < 176 then --fps
 				Main.TextEntry = "FPS"
 				Main.OldTextBuffer = Data.Generate[Main.TextEntry]
@@ -461,7 +529,7 @@ function love.mousepressed( x, y, button, istouch, presses )
 			elseif x >= 150 and y >= 114 and x < 169 and y < 121 then --clear (all of the buttons above to minstream including this one are 1 pixel overshot on the y axis...)
 				Data.Generate.Sources = {}
 				Save()
-				Audio.Option:play()
+				Audio.Option:play()    
 			elseif x >= 248 and y >= 1 and x < 318 and y < 18 then --render and open
 				Render()
 			--remove buttons
@@ -508,6 +576,67 @@ function love.mousepressed( x, y, button, istouch, presses )
 					Main.Cursor = Main.Cursor + 1
 				end]]
 			end
+		elseif Main.ActiveScreen == Enums.Transitions then
+			if x >= 301 and y >= 222 and x < 316 and y < 236 then --import
+				Audio.Prompt:play()
+				local prompt = {}
+				prompt.Title = "importing a clip"
+				prompt.Line2 = "there is currently no way to select files."
+				prompt.Line3 = "to import a video file, drag and drop it here."
+				prompt.Line4 = "it will be added and saved to your transition list."
+				prompt.Line1 = ""
+				prompt.Line5 = ""
+				prompt.Choice1 = ""
+				prompt.Callback1 = function() end
+				prompt.Callback2 = function() end
+				prompt.Choice2 = "okay"
+				prompt.Y = -240
+				prompt.State = Enums.PromptOpen
+				Main.Prompt = prompt
+				return false
+			elseif x >= 4 and y >= 222 and x < 19 and y < 235 then --up
+				if Main.TransitionCursor > 0 then
+					Audio.Option:play()
+					Main.TransitionCursor = Main.TransitionCursor-1
+				else
+					Audio.Prompt:play()
+				end
+			elseif x >= 19 and y >= 222 and x < 34 and y < 236 then --down
+				if Main.TransitionCursor+6 < #Data.Generate.Sources then
+					Audio.Option:play()
+					Main.TransitionCursor = Main.TransitionCursor+1
+				else
+					Audio.Prompt:play()
+				end
+			elseif x >= 150 and y >= 224 and x < 169 and y < 231 then --clear
+				Data.Generate.Transitions = {}
+				Save()
+				Audio.Option:play()
+			elseif x >= 301 and y >= 23 and x < 316 and y < 36 and #Data.Generate.Transitions >= 1 and Main.TransitionCursor < #Data.Generate.Transitions then
+				Audio.Option:play()
+				table.remove(Data.Generate.Transitions,Main.TransitionCursor+1)
+				Save()
+			elseif x >= 301 and y >= 37 and x < 316 and y < 51 and #Data.Generate.Transitions >= 2 and Main.TransitionCursor < #Data.Generate.Transitions then
+				Audio.Option:play()
+				table.remove(Data.Generate.Transitions,Main.TransitionCursor+2)
+				Save()
+			elseif x >= 301 and y >= 53 and x < 316 and y < 66 and #Data.Generate.Transitions >= 3 and Main.TransitionCursor < #Data.Generate.Transitions then
+				Audio.Option:play()
+				table.remove(Data.Generate.Transitions,Main.TransitionCursor+3)
+				Save()
+			elseif x >= 301 and y >= 67 and x < 316 and y < 81 and #Data.Generate.Transitions >= 4 and Main.TransitionCursor < #Data.Generate.Transitions then
+				Audio.Option:play()
+				table.remove(Data.Generate.Transitions,Main.TransitionCursor+4)
+				Save()
+			elseif x >= 301 and y >= 82 and x < 316 and y < 96 and #Data.Generate.Transitions >= 5 and Main.TransitionCursor < #Data.Generate.Transitions then
+				Audio.Option:play()
+				table.remove(Data.Generate.Transitions,Main.TransitionCursor+5)
+				Save()
+			elseif x >= 301 and y >= 97 and x < 316 and y < 111 and #Data.Generate.Transitions >= 6 and Main.TransitionCursor < #Data.Generate.Transitions then
+				Audio.Option:play()
+				table.remove(Data.Generate.Transitions,Main.TransitionCursor+6)
+				Save()
+			end
 		elseif Main.ActiveScreen >= Enums.LastScreen and Main.ActiveScreen < Enums.TotalScreens+1 and Data.Generate[Main.TextEntry] ~= nil then --text entry
 			if x >= 294 and y >= 2 and x < 318 and y < 19 then --enter
 				Data.Generate[Main.TextEntry] = Main.OldTextBuffer
@@ -540,6 +669,12 @@ function love.wheelmoved(x, y)
 			Main.Cursor = Main.Cursor+1
 		elseif y > 0 and Main.Cursor > 0 then --up
 			Main.Cursor = Main.Cursor-1
+		end
+	elseif Main.ActiveScreen == Enums.Transitions then
+		if y < 0 and Main.TransitionCursor+13 < #Data.Generate.Transitions then --down
+			Main.TransitionCursor = Main.TransitionCursor+1
+		elseif y > 0 and Main.TransitionCursor > 0 then --up
+			Main.TransitionCursor = Main.TransitionCursor-1
 		end
 	end
 end
@@ -607,29 +742,20 @@ end
 function love.filedropped( file )
 	local filename = file:getFilename()
 	love.audio.stop()
-	if filename:lower():sub(-4) == ".mp4" then
+	if Main.ActiveScreen == Enums.Generate then
 		table.insert(Data.Generate.Sources, filename)
 		Audio.Save:play()
 		if #Data.Generate.Sources - 6 > 0 then
 			Main.Cursor = #Data.Generate.Sources - 6
 		end
 		Save()
-	else
-		Audio.Prompt:play()
-		local prompt = {}
-		prompt.Title = "invalid file"
-		prompt.Line1 = ""
-		prompt.Line2 = "one of the files dropped was invalid."
-		prompt.Line3 = "more formats will be supported soon."
-		prompt.Line4 = "please use *.mp4 files only."
-		prompt.Line5 = ""
-		prompt.Choice1 = ""
-		prompt.Callback1 = function() end
-		prompt.Callback2 = function() end
-		prompt.Choice2 = "okay"
-		prompt.Y = -240
-		prompt.State = Enums.PromptOpen
-		Main.Prompt = prompt
+	elseif Main.ActiveScreen == Enums.Transitions then
+		table.insert(Data.Generate.Transitions, filename)
+		Audio.Save:play()
+		if #Data.Generate.Transitions - 13 > 0 then
+			Main.TransitionCursor = #Data.Generate.Transitions - 13
+		end
+		Save()
 	end
 end
 function Render()
@@ -654,11 +780,31 @@ function Render()
 				end
 			end
 			love.filesystem.write("videos.txt", writeto)
+			writeto = ""
+			for k,v in pairs(Data.Generate.Transitions) do
+				if writeto == "" then
+					writeto = v
+				else
+					writeto = writeto.."\n"..v
+				end
+			end
+			love.filesystem.write("transitions.txt", writeto)
 			local cwd = love.filesystem.getSaveDirectory()
 			if love.system.getOS() == "Windows" then
 				cwd = love.filesystem.getWorkingDirectory()
 			end
-			os.execute("node \""..cwd.."/YTPPlusCLI/index.js\" --skip=true --width="..Data.Generate.Width.." --height="..Data.Generate.Height.." --fps="..Data.Generate.FPS.." --input=\""..love.filesystem.getSaveDirectory().."/videos.txt\" --output=\""..Data.Generate.Output.."\" --clips="..Data.Generate.Clips.." --minstream="..Data.Generate.MinStream.." --maxstream="..Data.Generate.MaxStream.." --usetransitions="..Enums.BoolString[Data.Generate.Transitions])
+			local cmd = "node \""..cwd.."/YTPPlusCLI/index.js\" --skip=true --width="..Data.Generate.Width.." --height="..Data.Generate.Height.." --fps="..Data.Generate.FPS.." --input=\""..love.filesystem.getSaveDirectory().."/videos.txt\" --output=\""..Data.Generate.Output.."\" --clips="..Data.Generate.Clips.." --minstream="..Data.Generate.MinStream.." --maxstream="..Data.Generate.MaxStream.." --transitions=\""..love.filesystem.getSaveDirectory().."/transitions.txt\""
+			if Data.Generate.Debugging == true then
+				cmd = cmd.." --debug"
+			end
+			if Data.Generate.TransitionsActive == true then
+				cmd = cmd.." --usetransitions"
+			end
+			if Data.Generate.PluginTestActive == true then
+				cmd = cmd.." --plugintest="..Data.Generate.PluginTest
+			end
+			love.filesystem.write("command.txt", cmd)
+			os.execute(cmd)
 			love.system.openURL(Data.Generate.Output)
 		end
 		prompt.Callback2 = function() end
