@@ -1,7 +1,7 @@
 return {
     Version = {
         Major = 1,
-        Minor = 0,
+        Minor = 1,
         Patch = 0,
         Label = nil,
         Candidate = 0
@@ -91,8 +91,8 @@ return {
     BackgroundNone = 2,
     BackgroundBlack = 3,
     --fade toggles
-    FadeWhite = 0,
-    FadeBlack = 1,
+    FadeWhite = 1, --used to be 0
+    FadeBlack = 0, --used to be 1
     FadeNone = 2,
     --options, not yet implemented
     OptionsNames = {

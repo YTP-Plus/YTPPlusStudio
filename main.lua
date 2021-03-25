@@ -23,7 +23,8 @@ function love.load()
 		Prompt = nil,
 		OldTextBuffer = "",
 		TextEntry = "",
-		TextNum = false
+		TextNum = false,
+		Hovering = {}
 	}
 	love.window.setMode( Enums.Width*Data.Scaling, Enums.Height*Data.Scaling, Enums.WindowFlags )
 	love.mouse.setCursor( Graphics.Cursor )
@@ -61,17 +62,17 @@ function love.draw()
 	love.graphics.rectangle("fill",1,0,Enums.Width-2,2)
 	love.graphics.rectangle("fill",1,Enums.Height-2,Enums.Width-2,2)
 	--end border
+	--back button
+	love.graphics.setColor(0.5,0.5,0.5,Main.Boot)
+	love.graphics.rectangle("fill",2,2,17,17)
+	love.graphics.setColor(1,1,1,Main.Boot)
+	love.graphics.draw(Graphics.Back,2,2)
+	--end back button
 	if Main.ActiveScreen ~= Enums.Menu then
 		--header
 		love.graphics.setColor(1,1,1) --#FFFFFF
 		love.graphics.setFont(Graphics.Munro.Regular)
 		love.graphics.printf(Enums.ScreenNames[Main.ActiveScreen], 0, 6-3, Enums.Width, "center")
-		--back button
-		love.graphics.setColor(0.5,0.5,0.5)
-		love.graphics.rectangle("fill",2,2,17,17)
-		love.graphics.setColor(1,1,1)
-		love.graphics.draw(Graphics.Back,2,2)
-		--end back button
 		--draw screen types
 		if Main.ActiveScreen == Enums.Generate then
 			--mid divider
@@ -318,6 +319,16 @@ function love.draw()
 		--title
 		love.graphics.printf(Main.Prompt.Title, 0, Main.Prompt.Y+41-3, Enums.Width, "center")
 	end
+	if #Main.Hovering > 0 then
+		for k,v in ipairs(Main.Hovering) do
+			love.graphics.setColor(0.75,0.75,0.75, 1-(v.r*0.025))
+			love.graphics.circle( "line", v.x, v.y, v.r, 32)
+			v.r = v.r + 1.25
+			if v.r >= 100 then
+				table.remove(Main.Hovering, k)
+			end
+		end
+	end
 	love.graphics.setColor(1,1,1)
 	--end prompts
 	love.graphics.setCanvas() --This sets the target back to the screen
@@ -399,7 +410,11 @@ function love.mousepressed( x, y, button, istouch, presses )
 	love.audio.stop()
 	if Main.Prompt == nil then
 		if Main.ActiveScreen == Enums.Menu then
-			if x >= 22 and y >= 89 and x < 58 and y < 98 then --generate
+			if x >= 2 and y >= 2 and x < 19 and y < 19 then --back button
+				Main.NextScreen = Main.LastScreen
+				Main.Fade = Enums.FadeOut
+				Audio.Back:play()
+			elseif x >= 22 and y >= 89 and x < 58 and y < 98 then --generate
 				if promptytpcli() then
 					Main.NextScreen = Enums.Generate
 					Main.Fade = Enums.FadeOut
@@ -411,7 +426,7 @@ function love.mousepressed( x, y, button, istouch, presses )
 					Main.Fade = Enums.FadeOut
 					Audio.Select:play()
 				else
-					Audio.Prompt:play()
+					promptplugins()
 				end
 			elseif x >= 22 and y >= 137 and x < 51 and y < 146 then --options
 				if promptoptions() then
@@ -425,16 +440,16 @@ function love.mousepressed( x, y, button, istouch, presses )
 			elseif x >= 22 and y >= 161 and x < 37 and y < 170 then --quit
 				love.event.quit()
 			else
-				Audio.Hover:play()
+				hover(x, y)
 			end
-		elseif x >= 2 and y >= 2 and x < 19 and y < 19 then --back button
-			Main.NextScreen = Main.LastScreen
-			Main.Fade = Enums.FadeOut
-			Audio.Back:play()
 		end
 		--screens
 		if Main.ActiveScreen == Enums.Generate then
-			if x >= 301 and y >= 112 and x < 316 and y < 126 then --import
+			if x >= 2 and y >= 2 and x < 19 and y < 19 then --back button
+				Main.NextScreen = Main.LastScreen
+				Main.Fade = Enums.FadeOut
+				Audio.Back:play()
+			elseif x >= 301 and y >= 112 and x < 316 and y < 126 then --import
 				Audio.Prompt:play()
 				local prompt = {}
 				prompt.Title = "importing a clip"
@@ -575,9 +590,15 @@ function love.mousepressed( x, y, button, istouch, presses )
 				--[[if Main.Cursor == #Data.Generate.Sources-6 and (Main.Cursor-1) > 0 then --not working
 					Main.Cursor = Main.Cursor + 1
 				end]]
+			else
+				hover(x, y)
 			end
 		elseif Main.ActiveScreen == Enums.Transitions then
-			if x >= 301 and y >= 222 and x < 316 and y < 236 then --import
+			if x >= 2 and y >= 2 and x < 19 and y < 19 then --back button
+				Main.NextScreen = Main.LastScreen
+				Main.Fade = Enums.FadeOut
+				Audio.Back:play()
+			elseif x >= 301 and y >= 222 and x < 316 and y < 236 then --import
 				Audio.Prompt:play()
 				local prompt = {}
 				prompt.Title = "importing a clip"
@@ -636,17 +657,29 @@ function love.mousepressed( x, y, button, istouch, presses )
 				Audio.Option:play()
 				table.remove(Data.Generate.Transitions,Main.TransitionCursor+6)
 				Save()
+			else
+				hover(x, y)
 			end
 		elseif Main.ActiveScreen >= Enums.LastScreen and Main.ActiveScreen < Enums.TotalScreens+1 and Data.Generate[Main.TextEntry] ~= nil then --text entry
-			if x >= 294 and y >= 2 and x < 318 and y < 19 then --enter
+			if x >= 2 and y >= 2 and x < 19 and y < 19 then --back button
+				Main.NextScreen = Main.LastScreen
+				Main.Fade = Enums.FadeOut
+				Audio.Back:play()
+			elseif x >= 294 and y >= 2 and x < 318 and y < 19 then --enter
 				Data.Generate[Main.TextEntry] = Main.OldTextBuffer
 				Main.NextScreen = Main.LastScreen
 				Main.Fade = Enums.FadeOut
 				Audio.Select:play()
+			else
+				hover(x, y)
 			end
 		end
 	elseif Main.Prompt.State == Enums.PromptStay then  
-		if x >= 50 and y >= 135 and x < 270 and y < 161 and Main.Prompt.Choice1 ~= "" then --option 1
+		if x >= 2 and y >= 2 and x < 19 and y < 19 then --back button
+			Main.NextScreen = Main.LastScreen
+			Main.Fade = Enums.FadeOut
+			Audio.Back:play()
+		elseif x >= 50 and y >= 135 and x < 270 and y < 161 and Main.Prompt.Choice1 ~= "" then --option 1
 			Main.Prompt.State = Enums.PromptClose
 			Main.Prompt.Callback1()
 			Audio.Select:play()
@@ -655,7 +688,7 @@ function love.mousepressed( x, y, button, istouch, presses )
 			Main.Prompt.Callback2()
 			Audio.Select:play()
 		else
-			Audio.Hover:play()
+			hover(x, y)
 		end
 	end
 end
@@ -806,6 +839,7 @@ function Render()
 			love.filesystem.write("command.txt", cmd)
 			os.execute(cmd)
 			love.system.openURL(Data.Generate.Output)
+			promptrendering()
 		end
 		prompt.Callback2 = function() end
 		prompt.Choice2 = "no"
@@ -813,11 +847,11 @@ function Render()
 		prompt.State = Enums.PromptOpen
 	else
 		prompt.Title = "no output file"
-		prompt.Line1 = ""
-		prompt.Line2 = "please set an output file before rendering."
-		prompt.Line3 = "the output file must be in a full path that exists."
-		prompt.Line4 = "setting the output file will allow for rendering."
-		prompt.Line5 = ""
+		prompt.Line1 = "please set an output file before rendering."
+		prompt.Line2 = "the output file must be in a full path that exists."
+		prompt.Line3 = "setting the output file will allow for rendering."
+		prompt.Line4 = ""
+		prompt.Line5 = "example: \"c:\\myvideo.mp4\" is valid."
 		prompt.Choice1 = ""
 		prompt.Callback1 = function() end
 		prompt.Callback2 = function() end
@@ -907,8 +941,52 @@ function promptoptions()
 		return true
 	end
 end
+function promptplugins()
+	Audio.Prompt:play()
+	local prompt = {}
+	prompt.Title = "plugins aren't yet available"
+	prompt.Line1 = ""
+	prompt.Line2 = "you can temporarily set plugins by"
+	prompt.Line3 = "removing or adding files in"
+	prompt.Line4 = "ytppluscli/plugins/ and rendering."
+	prompt.Line5 = ""
+	prompt.Choice1 = "open ytppluscli/plugins/"
+	prompt.Callback1 = function()
+		love.system.openURL(love.filesystem.getWorkingDirectory().."/YTPPlusCLI")
+	end
+	prompt.Callback2 = function() end
+	prompt.Choice2 = "okay"
+	prompt.Y = -240
+	prompt.State = Enums.PromptOpen
+	Main.Prompt = prompt
+	return false
+end
+function promptrendering()
+	Audio.Prompt:play()
+	local prompt = {}
+	prompt.Title = "how did rendering go?"
+	prompt.Line1 = "if the video didn't open and"
+	prompt.Line2 = "the file doesn't exist, feel free"
+	prompt.Line3 = "to ask us on our discord for help!"
+	prompt.Line4 = ""
+	prompt.Line5 = "you may also manually troubleshoot."
+	prompt.Choice1 = "open command.txt"
+	prompt.Callback1 = function()
+		love.system.openURL(love.filesystem.getSaveDirectory().."/command.txt")
+	end
+	prompt.Callback2 = function() end
+	prompt.Choice2 = "okay"
+	prompt.Y = -240
+	prompt.State = Enums.PromptOpen
+	Main.Prompt = prompt
+	return false
+end
 function Save()
 	if not love.keyboard.isDown("lshift") then
 		love.filesystem.write("settings.txt",TSerial.pack(Data, nil, true)) --save data
 	end
+end
+function hover(x, y)
+	Audio.Hover:play()
+	table.insert(Main.Hovering, {x=x, y=y, r=1})
 end
