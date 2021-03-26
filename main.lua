@@ -952,7 +952,7 @@ function promptplugins()
 	prompt.Line5 = ""
 	prompt.Choice1 = "open ytppluscli/plugins/"
 	prompt.Callback1 = function()
-		love.system.openURL(love.filesystem.getWorkingDirectory().."/YTPPlusCLI")
+		love.system.openURL(love.filesystem.getWorkingDirectory().."/YTPPlusCLI/plugins")
 	end
 	prompt.Callback2 = function() end
 	prompt.Choice2 = "okay"
