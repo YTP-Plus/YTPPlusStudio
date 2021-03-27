@@ -1,7 +1,7 @@
 return {
     Version = {
         Major = 1,
-        Minor = 1,
+        Minor = 2,
         Patch = 0,
         Label = nil,
         Candidate = 0
@@ -16,7 +16,7 @@ return {
         msaa = 0,
         stencil = true,
         depth = 0,
-        resizable = false,
+        resizable = true,
         borderless = false,
         centered = true,
         display = 1,

@@ -7,6 +7,8 @@ function love.load()
 	Canvas = love.graphics.newCanvas(Enums.Width,Enums.Height)
 	Canvas:setFilter("nearest", "nearest")
 	Main = {
+		Status = nil,
+		Shutdown = nil,
 		Cursor = 0,
 		TransitionCursor = 0,
 		Boot = 0,
@@ -42,7 +44,11 @@ function love.draw()
 	love.graphics.setCanvas(Canvas) --This sets the draw target to the canvas
 	love.graphics.clear()
 	if Data.BackgroundType < Enums.BackgroundBlack then
-		love.graphics.setBackgroundColor(0.25,0.25,0.25,Main.Boot) --#404040
+		if Main.Shutdown == true then
+			love.graphics.setBackgroundColor(0.25*Main.Boot,0.25*Main.Boot,0.25*Main.Boot)
+		else
+			love.graphics.setBackgroundColor(0.25,0.25,0.25)
+		end
 	end
 	--tiled background
 	if Data.BackgroundType < Enums.BackgroundNone then
@@ -62,17 +68,17 @@ function love.draw()
 	love.graphics.rectangle("fill",1,0,Enums.Width-2,2)
 	love.graphics.rectangle("fill",1,Enums.Height-2,Enums.Width-2,2)
 	--end border
-	--back button
-	love.graphics.setColor(0.5,0.5,0.5,Main.Boot)
-	love.graphics.rectangle("fill",2,2,17,17)
-	love.graphics.setColor(1,1,1,Main.Boot)
-	love.graphics.draw(Graphics.Back,2,2)
-	--end back button
 	if Main.ActiveScreen ~= Enums.Menu then
 		--header
 		love.graphics.setColor(1,1,1) --#FFFFFF
 		love.graphics.setFont(Graphics.Munro.Regular)
-		love.graphics.printf(Enums.ScreenNames[Main.ActiveScreen], 0, 6-3, Enums.Width, "center")
+		if Main.Status == nil then
+			love.graphics.printf(Enums.ScreenNames[Main.ActiveScreen], 0, 6-3, Enums.Width, "center") --minus 3 due to font scaling
+		else
+			love.graphics.setFont(Graphics.Munro.Small)
+			love.graphics.printf(Main.Status,0,6-3, Enums.Width, "center") --minus 3 due to font scaling
+			love.graphics.setFont(Graphics.Munro.Regular)
+		end
 		--draw screen types
 		if Main.ActiveScreen == Enums.Generate then
 			--mid divider
@@ -162,11 +168,15 @@ function love.draw()
 			end
 			--modifier shadows
 			love.graphics.setColor(0,0,0)
+			love.graphics.setScissor(42,131,116,13)
 			love.graphics.print(Data.Generate.Output,44,131-2)
+			love.graphics.setScissor( )
 			love.graphics.print(Data.Generate.PluginTest,219,131-2)
 			--modifiers
 			love.graphics.setColor(1,1,1)
+			love.graphics.setScissor(42,131,116,13)
 			love.graphics.print(Data.Generate.Output,43,131-3)
+			love.graphics.setScissor( )
 			love.graphics.print(Data.Generate.PluginTest,218,131-3)
 			love.graphics.print(Data.Generate.MinStream,124,166-3)
 			love.graphics.print(Data.Generate.MaxStream,128,183-3)
@@ -190,7 +200,16 @@ function love.draw()
 			love.graphics.setColor(1,1,1)
 			love.graphics.print("enter",296,6-3)
 			love.graphics.draw(Graphics.Generate.Dividers.Import,8,127)
+			love.graphics.setColor(0,0,0)
+			love.graphics.printf(Main.OldTextBuffer, 1, 116-2, Enums.Width, "center")
+			love.graphics.printf("[backspace]\nremove key\n\n[delete]\nclear all characters", 17, 155-2, Enums.Width-16, "left")
+			love.graphics.printf("[ctrl] + [c]\ncopy\n\n[ctrl] + [v]\npaste", 1, 155-2, Enums.Width-16, "right")
+			love.graphics.printf("[escape]\nreset text\n\n[return]\ncommit changes", 1, 155-2, Enums.Width, "center")
+			love.graphics.setColor(1,1,1)
 			love.graphics.printf(Main.OldTextBuffer, 0, 116-3, Enums.Width, "center")
+			love.graphics.printf("[backspace]\nremove key\n\n[delete]\nclear all characters", 16, 155-3, Enums.Width-16, "left")
+			love.graphics.printf("[ctrl] + [c]\ncopy\n\n[ctrl] + [v]\npaste", 0, 155-3, Enums.Width-16, "right")
+			love.graphics.printf("[escape]\nreset text\n\n[return]\ncommit changes", 0, 155-3, Enums.Width, "center")
 		elseif Main.ActiveScreen == Enums.Transitions then
 			love.graphics.setColor(1,1,1)
 			love.graphics.draw(Graphics.Transitions.TransitionsBG,4,21)
@@ -272,15 +291,27 @@ function love.draw()
 	else --menu
 		--header
 		love.graphics.setColor(1,1,1,Main.Boot) --white with boot sequence as its transparency
-		love.graphics.draw(Graphics.Icon, 129+Graphics.Icon:getWidth()/2,4+Graphics.Icon:getHeight()/2, Main.Flip, 1, 1, Graphics.Icon:getWidth()/2, Graphics.Icon:getHeight()/2) --this icon is positioned by its center and rotates that way
 		love.graphics.setFont(Graphics.Munro.Regular)
-		love.graphics.print("ytp+ studio",146,6-3) --minus 3 due to font scaling
+		if Main.Status == nil then
+			love.graphics.draw(Graphics.Icon, 129+Graphics.Icon:getWidth()/2,4+Graphics.Icon:getHeight()/2, Main.Flip, 1, 1, Graphics.Icon:getWidth()/2, Graphics.Icon:getHeight()/2) --this icon is positioned by its center and rotates that way
+			love.graphics.print("ytp+ studio",146,6-3) --minus 3 due to font scaling
+		else
+			love.graphics.setFont(Graphics.Munro.Small)
+			love.graphics.printf(Main.Status,0,6-3, Enums.Width, "center") --minus 3 due to font scaling
+			love.graphics.setFont(Graphics.Munro.Regular)
+		end
 		--buttons
 		love.graphics.setColor(0,0,0,Main.Boot)
-		love.graphics.print("generate\n\nplugins (not yet available)\n\noptions\n\nquit",23,90-3) --shadow
+		love.graphics.print("generate\n\nplugins\n\noptions\n\nquit",23,90-3) --shadow
 		love.graphics.setColor(1,1,1,Main.Boot)
-		love.graphics.print("generate\n\nplugins (not yet available)\n\noptions\n\nquit",22,89-3) --main menu, not centered, \n means new line
+		love.graphics.print("generate\n\nplugins\n\noptions\n\nquit",22,89-3) --main menu, not centered, \n means new line
 	end
+	--back button
+	love.graphics.setColor(0.5,0.5,0.5,Main.Boot)
+	love.graphics.rectangle("fill",2,2,17,17)
+	love.graphics.setColor(1,1,1,Main.Boot)
+	love.graphics.draw(Graphics.Back,2,2)
+	--end back button
 	--fading
 	local color = 1
 	local fadet = Main.ScreenWait
@@ -324,7 +355,7 @@ function love.draw()
 			love.graphics.setColor(0.75,0.75,0.75, 1-(v.r*0.025))
 			love.graphics.circle( "line", v.x, v.y, v.r, 32)
 			v.r = v.r + 1.25
-			if v.r >= 100 then
+			if (1-(v.r*0.025)) <= 0 or v.r >= 100 then
 				table.remove(Main.Hovering, k)
 			end
 		end
@@ -333,9 +364,104 @@ function love.draw()
 	--end prompts
 	love.graphics.setCanvas() --This sets the target back to the screen
 	love.graphics.setColor(1,1,1,Main.Boot) --#FFFFFF
-	love.graphics.draw(Canvas, 0, 0, 0, Data.Scaling, Data.Scaling)
+	love.graphics.draw(Canvas, 0, 0, 0, (love.graphics.getWidth()/Enums.Width), (love.graphics.getHeight()/Enums.Height))
 end
 function love.update(dt)
+	local mx, my = love.mouse.getPosition()
+	mx = mx/(love.graphics.getWidth()/Enums.Width) --scale up mouse x
+	my = my/(love.graphics.getHeight()/Enums.Height) --ditto with y
+	if mx >= 2 and my >= 2 and mx < 19 and my < 19 then --back button
+		Main.Status = "go back to previous page"
+	--status--
+	elseif Main.ActiveScreen == Enums.Menu then
+		if mx >= 22 and my >= 89 and mx < 58 and my < 98 then --generate
+			Main.Status = "generate nonsensical videos"
+		elseif mx >= 22 and my >= 113 and mx < 49 and my < 122 then --plugins
+			Main.Status = "add or remove effect types"
+		elseif mx >= 22 and my >= 137 and mx < 51 and my < 146 then --options
+			Main.Status = "configure ytp+ studio"
+		elseif mx >= 22 and my >= 161 and mx < 37 and my < 170 then --quit
+			Main.Status = "exit and save settings"
+		else
+			Main.Status = nil
+		end
+	elseif Main.ActiveScreen == Enums.Generate then
+		if mx >= 301 and my >= 112 and mx < 316 and my < 126 then --import
+			Main.Status = "import a clip"
+		elseif mx >= 6 and my >= 23 and mx < 301 and my < 37 and Data.Generate.Sources[Main.Cursor+1] then --first generator entry
+			Main.Status = string.gsub(Data.Generate.Sources[Main.Cursor+1], ".*\\", " ")
+		elseif mx >= 6 and my >= 37 and mx < 301 and my < 52 and Data.Generate.Sources[Main.Cursor+2] then --and so on
+			Main.Status = string.gsub(Data.Generate.Sources[Main.Cursor+2], ".*\\", " ")
+		elseif mx >= 6 and my >= 52 and mx < 301 and my < 67 and Data.Generate.Sources[Main.Cursor+3] then
+			Main.Status = string.gsub(Data.Generate.Sources[Main.Cursor+3], ".*\\", " ")
+		elseif mx >= 6 and my >= 97 and mx < 301 and my < 112 and Data.Generate.Sources[Main.Cursor+4] then --end
+			Main.Status = string.gsub(Data.Generate.Sources[Main.Cursor+4], ".*\\", " ")
+		--remove buttons--
+		elseif mx >= 150 and my >= 114 and mx < 169 and my < 121  then --clear
+			Main.Status = "clear all clips in queue"
+		elseif mx >= 301 and my >= 23 and mx < 316 and my < 36 and #Data.Generate.Sources >= 1 and Main.Cursor < #Data.Generate.Sources then
+			Main.Status = "remove this clip"
+		elseif mx >= 301 and my >= 37 and mx < 316 and my < 51 and #Data.Generate.Sources >= 2 and Main.Cursor < #Data.Generate.Sources then
+			Main.Status = "remove this clip"
+		elseif mx >= 301 and my >= 53 and mx < 316 and my < 66 and #Data.Generate.Sources >= 3 and Main.Cursor < #Data.Generate.Sources then
+			Main.Status = "remove this clip"
+		elseif mx >= 301 and my >= 67 and mx < 316 and my < 81 and #Data.Generate.Sources >= 4 and Main.Cursor < #Data.Generate.Sources then
+			Main.Status = "remove this clip"
+		elseif mx >= 301 and my >= 82 and mx < 316 and my < 96 and #Data.Generate.Sources >= 5 and Main.Cursor < #Data.Generate.Sources then
+			Main.Status = "remove this clip"
+		elseif mx >= 301 and my >= 97 and mx < 316 and my < 111 and #Data.Generate.Sources >= 6 and Main.Cursor < #Data.Generate.Sources then
+			Main.Status = "remove this clip"
+		else
+			Main.Status = nil
+		end
+	elseif Main.ActiveScreen == Enums.Transitions then
+		if mx >= 6 and my >= 23 and mx < 301 and my < 37 and Data.Generate.Transitions[Main.TransitionCursor+1] then --first transition entry
+			Main.Status = string.gsub(Data.Generate.Transitions[Main.TransitionCursor+1], ".*\\", " ")
+		elseif mx >= 6 and my >= 37 and mx < 301 and my < 52 and Data.Generate.Transitions[Main.TransitionCursor+2] then --and so on
+			Main.Status = string.gsub(Data.Generate.Transitions[Main.TransitionCursor+2], ".*\\", " ")
+		elseif mx >= 6 and my >= 52 and mx < 301 and my < 67 and Data.Generate.Transitions[Main.TransitionCursor+3] then
+			Main.Status = string.gsub(Data.Generate.Transitions[Main.TransitionCursor+3], ".*\\", " ")
+		elseif mx >= 6 and my >= 67 and mx < 301 and my < 82 and Data.Generate.Transitions[Main.TransitionCursor+4] then
+			Main.Status = string.gsub(Data.Generate.Transitions[Main.TransitionCursor+4], ".*\\", " ")
+		elseif mx >= 6 and my >= 82 and mx < 301 and my < 97 and Data.Generate.Transitions[Main.TransitionCursor+5] then
+			Main.Status = string.gsub(Data.Generate.Transitions[Main.TransitionCursor+5], ".*\\", " ")
+		elseif mx >= 6 and my >= 97 and mx < 301 and my < 112 and Data.Generate.Transitions[Main.TransitionCursor+6] then
+			Main.Status = string.gsub(Data.Generate.Transitions[Main.TransitionCursor+6], ".*\\", " ")
+		elseif mx >= 6 and my >= 112 and mx < 301 and my < 127 and Data.Generate.Transitions[Main.TransitionCursor+6] then
+			Main.Status = string.gsub(Data.Generate.Transitions[Main.TransitionCursor+7], ".*\\", " ")
+		elseif mx >= 6 and my >= 127 and mx < 301 and my < 142 and Data.Generate.Transitions[Main.TransitionCursor+6] then
+			Main.Status = string.gsub(Data.Generate.Transitions[Main.TransitionCursor+8], ".*\\", " ")
+		elseif mx >= 6 and my >= 142 and mx < 301 and my < 157 and Data.Generate.Transitions[Main.TransitionCursor+7] then
+			Main.Status = string.gsub(Data.Generate.Transitions[Main.TransitionCursor+9], ".*\\", " ")
+		elseif mx >= 6 and my >= 157 and mx < 301 and my < 172 and Data.Generate.Transitions[Main.TransitionCursor+8] then
+			Main.Status = string.gsub(Data.Generate.Transitions[Main.TransitionCursor+10], ".*\\", " ")
+		elseif mx >= 6 and my >= 172 and mx < 301 and my < 187 and Data.Generate.Transitions[Main.TransitionCursor+9] then
+			Main.Status = string.gsub(Data.Generate.Transitions[Main.TransitionCursor+11], ".*\\", " ")
+		elseif mx >= 6 and my >= 187 and mx < 301 and my < 202 and Data.Generate.Transitions[Main.TransitionCursor+10] then
+			Main.Status = string.gsub(Data.Generate.Transitions[Main.TransitionCursor+12], ".*\\", " ")
+		elseif mx >= 6 and my >= 202 and mx < 301 and my < 217 and Data.Generate.Transitions[Main.TransitionCursor+11] then
+			Main.Status = string.gsub(Data.Generate.Transitions[Main.TransitionCursor+13], ".*\\", " ")
+		--remove buttons--
+		elseif mx >= 150 and my >= 224 and mx < 169 and my < 231 then --clear
+			Main.Status = "clear all clips in queue"
+		elseif mx >= 301 and my >= 23 and mx < 316 and my < 36 and #Data.Generate.Transitions >= 1 and Main.TransitionCursor < #Data.Generate.Transitions then
+			Main.Status = "remove this clip"
+		elseif mx >= 301 and my >= 37 and mx < 316 and my < 51 and #Data.Generate.Transitions >= 2 and Main.TransitionCursor < #Data.Generate.Transitions then
+			Main.Status = "remove this clip"
+		elseif mx >= 301 and my >= 53 and mx < 316 and my < 66 and #Data.Generate.Transitions >= 3 and Main.TransitionCursor < #Data.Generate.Transitions then
+			Main.Status = "remove this clip"
+		elseif mx >= 301 and my >= 67 and mx < 316 and my < 81 and #Data.Generate.Transitions >= 4 and Main.TransitionCursor < #Data.Generate.Transitions then
+			Main.Status = "remove this clip"
+		elseif mx >= 301 and my >= 82 and mx < 316 and my < 96 and #Data.Generate.Transitions >= 5 and Main.TransitionCursor < #Data.Generate.Transitions then
+			Main.Status = "remove this clip"
+		elseif mx >= 301 and my >= 97 and mx < 316 and my < 111 and #Data.Generate.Transitions >= 6 and Main.TransitionCursor < #Data.Generate.Transitions then
+			Main.Status = "remove this clip"
+		else
+			Main.Status = nil
+		end
+	else
+		Main.Status = nil
+	end
 	if Main.Prompt ~= nil then
 		if Main.Prompt.State == Enums.PromptOpen then
 			if Data.InstantPrompts ~= true then
@@ -361,8 +487,14 @@ function love.update(dt)
 			end
 		end
 	end
-	if Main.Boot < 1 then --boot sequence
+	if Main.Boot < 1 and Main.Shutdown == nil then --boot sequence
 		Main.Boot = Main.Boot + 0.005 --despacito
+		Main.Status = "welcome!"
+	elseif Main.Boot <= 0 and Main.Shutdown == true then
+		love.event.quit()
+	elseif Main.Boot < 1 and Main.Shutdown == true then --boot sequence
+		Main.Boot = Main.Boot - 0.005 --despacito
+		Main.Status = "see ya!"
 	end
 	--screen change fading
 	if Main.Fade == Enums.FadeOut and Main.ScreenWait < 1 then --fade to white
@@ -404,9 +536,10 @@ function love.update(dt)
 	if Main.Y >= Enums.BackgroundSize then Main.Y = 0 end --ditto with y
 end
 function love.mousepressed( x, y, button, istouch, presses )
+	if Main.Shutdown then return end
 	Main.Boot = 1 --disable boot sequence
-	x = x/Data.Scaling --scale up mouse x
-	y = y/Data.Scaling --ditto with y
+	x = x/(love.graphics.getWidth()/Enums.Width) --scale up mouse x
+	y = y/(love.graphics.getHeight()/Enums.Height) --ditto with y
 	love.audio.stop()
 	if Main.Prompt == nil then
 		if Main.ActiveScreen == Enums.Menu then
@@ -438,7 +571,9 @@ function love.mousepressed( x, y, button, istouch, presses )
 				Main.Flipping = true
 				Audio.Select:play()
 			elseif x >= 22 and y >= 161 and x < 37 and y < 170 then --quit
-				love.event.quit()
+				Audio.Quit:play()
+				Main.Shutdown = true
+				Main.Boot = Main.Boot - 0.005
 			else
 				hover(x, y)
 			end
@@ -746,6 +881,8 @@ function love.keypressed(k)
 		if love.keyboard.isDown("rctrl") or love.keyboard.isDown("lctrl") then --ctrl operators
 			if k == "v" then
 				Main.OldTextBuffer = Main.OldTextBuffer..love.system.getClipboardText()
+			elseif k == "c" then
+				love.system.setClipboardText(Main.OldTextBuffer)
 			end
 		elseif k == "backspace" then --https://love2d.org/wiki/love.textinput
 			-- get the byte offset to the last UTF-8 character in the string.
