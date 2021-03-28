@@ -1,4 +1,5 @@
 function love.load()
+	Networking = require("networking")
 	utf8 = require("utf8")
 	Audio = require("audio")
 	Graphics = require("gfx")
@@ -26,7 +27,8 @@ function love.load()
 		OldTextBuffer = "",
 		TextEntry = "",
 		TextNum = false,
-		Hovering = {}
+		Hovering = {},
+		NetStatus = {}
 	}
 	love.window.setMode( Enums.Width*Data.Scaling, Enums.Height*Data.Scaling, Enums.WindowFlags )
 	love.mouse.setCursor( Graphics.Cursor )
@@ -39,7 +41,49 @@ function love.load()
 	love.keyboard.setKeyRepeat(true)
 	love.filesystem.mount(love.filesystem.getSourceBaseDirectory(), "")
 	Save()
+	--networking--
+	-- subscribe to a channel and receive callbacks when new json messages arrive
+	Networking.hub:subscribe({
+		channel = "ytpplus";
+		callback = function(message)
+			if(message.action == "ping") then 
+				--print("["..message.timestamp.."] Recieved '"..message.action.."' from '"..message.from.."'!")
+				Main.NetStatus[1] = Main.NetStatus[2]
+				Main.NetStatus[2] = "pinged!"
+			end
+			--if message.from == "ytppluscli" then
+				if(message.action == "log")   then 
+					--print("["..message.timestamp.."] '"..message.action.."' from '"..message.from.."' - "..message.data)
+					Main.NetStatus[1] = Main.NetStatus[2]
+					Main.NetStatus[2] = message.data
+				elseif(message.action == "complete") then
+					if Main.Prompt ~= nil then
+						if Main.Prompt.Title == "rendering..." then
+							Main.Prompt.Callback1()
+						end
+					end
+				elseif(message.action == "error") then
+					if Main.Prompt ~= nil then
+						if Main.Prompt.Title == "rendering..." then
+							Main.Prompt.Callback2()
+						end
+					end
+				end
+			--end
+		end
+	})
+
+	-- say something to everybody on the channel
+	Networking.hub:publish({
+		message = {
+			from = "ytpplusstudio",
+			action  =  "ping",
+			timestamp = os.time()
+		}
+	});
+	--end networking
 end
+
 function love.draw()
 	love.graphics.setCanvas(Canvas) --This sets the draw target to the canvas
 	love.graphics.clear()
@@ -168,7 +212,7 @@ function love.draw()
 			end
 			--modifier shadows
 			love.graphics.setColor(0,0,0)
-			love.graphics.setScissor(42,131,116,13)
+			love.graphics.setScissor(43,132,116,13)
 			love.graphics.print(Data.Generate.Output,44,131-2)
 			love.graphics.setScissor( )
 			love.graphics.print(Data.Generate.PluginTest,219,131-2)
@@ -337,12 +381,27 @@ function love.draw()
 		if Main.Prompt.Choice1 ~= "" then
 			love.graphics.draw(Graphics.Choice,50+Graphics.Choice:getWidth()/2,Main.Prompt.Y+135+Graphics.Choice:getHeight()/2, 0, 1, 1, Graphics.Choice:getWidth()/2, Graphics.Choice:getHeight()/2)
 		end
+		if Main.Prompt.Choice2 ~= "" then
+			love.graphics.draw(Graphics.Choice,50+Graphics.Choice:getWidth()/2,Main.Prompt.Y+163+Graphics.Choice:getHeight()/2, 0, 1, 1, Graphics.Choice:getWidth()/2, Graphics.Choice:getHeight()/2)
+		end
 		love.graphics.setColor(1,1,1)
 		--description
 		love.graphics.printf(Main.Prompt.Line1, 0, Main.Prompt.Y+66-3, Enums.Width, "center")
 		love.graphics.printf(Main.Prompt.Line2, 0, Main.Prompt.Y+78-3, Enums.Width, "center")
 		love.graphics.printf(Main.Prompt.Line3, 0, Main.Prompt.Y+90-3, Enums.Width, "center")
-		love.graphics.printf(Main.Prompt.Line4, 0, Main.Prompt.Y+102-3, Enums.Width, "center")
+		if Main.Prompt.Title == "rendering..." then
+			if Main.NetStatus[1] ~= nil and Main.NetStatus[2] ~= nil then
+				love.graphics.setColor(0.75,0.75,0.75)
+				love.graphics.printf(Main.NetStatus[1], 0, Main.Prompt.Y+102-3, Enums.Width, "center")
+				love.graphics.setColor(1,1,1)
+				love.graphics.printf("\n"..Main.NetStatus[2], 0, Main.Prompt.Y+102-3, Enums.Width, "center")
+			elseif Main.NetStatus[2] ~= nil then
+				love.graphics.setColor(1,1,1)
+				love.graphics.printf("\n"..Main.NetStatus[2], 0, Main.Prompt.Y+100-3, Enums.Width, "center")
+			end
+		else
+			love.graphics.printf(Main.Prompt.Line4, 0, Main.Prompt.Y+102-3, Enums.Width, "center")
+		end
 		love.graphics.printf(Main.Prompt.Line5, 0, Main.Prompt.Y+114-3, Enums.Width, "center")
 		--choices
 		love.graphics.printf(Main.Prompt.Choice1, 0, Main.Prompt.Y+144-3, Enums.Width, "center")
@@ -367,6 +426,7 @@ function love.draw()
 	love.graphics.draw(Canvas, 0, 0, 0, (love.graphics.getWidth()/Enums.Width), (love.graphics.getHeight()/Enums.Height))
 end
 function love.update(dt)
+	Networking.hub:enterFrame() -- making sure to give some CPU time to Noobhub
 	local mx, my = love.mouse.getPosition()
 	mx = mx/(love.graphics.getWidth()/Enums.Width) --scale up mouse x
 	my = my/(love.graphics.getHeight()/Enums.Height) --ditto with y
@@ -818,7 +878,7 @@ function love.mousepressed( x, y, button, istouch, presses )
 			Main.Prompt.State = Enums.PromptClose
 			Main.Prompt.Callback1()
 			Audio.Select:play()
-		elseif x >= 50 and y >= 163 and x < 270 and y < 189 then --option 2
+		elseif x >= 50 and y >= 163 and x < 270 and y < 189 and Main.Prompt.Choice2 ~= "" then --option 2
 			Main.Prompt.State = Enums.PromptClose
 			Main.Prompt.Callback2()
 			Audio.Select:play()
@@ -935,9 +995,9 @@ function Render()
 	if Data.Generate.Output ~= "" and Data.Generate.Output ~= nil then
 		prompt.Title = "render video"
 		prompt.Line1 = "rendering will launch ytp+ cli in the background."
-		prompt.Line2 = "ytp+ studio will be paused until completion."
-		prompt.Line3 = "we'll try to open the file if its output is a full path."
-		prompt.Line4 = ""
+		prompt.Line2 = ""
+		prompt.Line3 = "rendering may fail if your output is not set to a"
+		prompt.Line4 = "path to an *.mp4 file such as 'c:\\output.mp4'."
 		prompt.Line5 = "would you like to proceed?"
 		prompt.Choice1 = "yes"
 		prompt.Callback1 = function()
@@ -960,10 +1020,17 @@ function Render()
 			end
 			love.filesystem.write("transitions.txt", writeto)
 			local cwd = love.filesystem.getSaveDirectory()
+			local startcmd = ""
+			local endcmd = ""
 			if love.system.getOS() == "Windows" then
 				cwd = love.filesystem.getWorkingDirectory()
+				startcmd = "start /B \"ytp+ cli (DO NOT CLOSE)\" "
+			elseif love.system.getOS() == "OS X" then
+				startcmd = "open "
+			elseif love.system.getOS() == "Linux" then
+				startcmd = "xdg-open "
 			end
-			local cmd = "node \""..cwd.."/YTPPlusCLI/index.js\" --skip=true --width="..Data.Generate.Width.." --height="..Data.Generate.Height.." --fps="..Data.Generate.FPS.." --input=\""..love.filesystem.getSaveDirectory().."/videos.txt\" --output=\""..Data.Generate.Output.."\" --clips="..Data.Generate.Clips.." --minstream="..Data.Generate.MinStream.." --maxstream="..Data.Generate.MaxStream.." --transitions=\""..love.filesystem.getSaveDirectory().."/transitions.txt\""
+			local cmd = startcmd.."node \""..cwd.."/YTPPlusCLI/index.js\" --skip=true --width="..Data.Generate.Width.." --height="..Data.Generate.Height.." --fps="..Data.Generate.FPS.." --input=\""..love.filesystem.getSaveDirectory().."/videos.txt\" --output=\""..Data.Generate.Output.."\" --clips="..Data.Generate.Clips.." --minstream="..Data.Generate.MinStream.." --maxstream="..Data.Generate.MaxStream.." --transitions=\""..love.filesystem.getSaveDirectory().."/transitions.txt\""..endcmd
 			if Data.Generate.Debugging == true then
 				cmd = cmd.." --debug"
 			end
@@ -975,7 +1042,6 @@ function Render()
 			end
 			love.filesystem.write("command.txt", cmd)
 			os.execute(cmd)
-			love.system.openURL(Data.Generate.Output)
 			promptrendering()
 		end
 		prompt.Callback2 = function() end
@@ -1101,18 +1167,58 @@ end
 function promptrendering()
 	Audio.Prompt:play()
 	local prompt = {}
-	prompt.Title = "how did rendering go?"
-	prompt.Line1 = "if the video didn't open and"
-	prompt.Line2 = "the file doesn't exist, feel free"
-	prompt.Line3 = "to ask us on our discord for help!"
-	prompt.Line4 = ""
-	prompt.Line5 = "you may also manually troubleshoot."
-	prompt.Choice1 = "open command.txt"
+	prompt.Title = "rendering..."
+	prompt.Line1 = "the video is rendering, see below:"
+	prompt.Line2 = ""
+	prompt.Line3 = ""
+	prompt.Line4 = "\nwaiting for network..."
+	prompt.Line5 = "\n\n\n\nif the video is finished, this prompt will close."
+	prompt.Choice1 = ""
 	prompt.Callback1 = function()
-		love.system.openURL(love.filesystem.getSaveDirectory().."/command.txt")
+		Main.NetStatus[1] = ""
+		love.window.requestAttention(true)
+		Audio.RenderComplete:play()
+		local prompt = {}
+		prompt.Title = "rendering complete"
+		prompt.Line1 = ""
+		prompt.Line2 = "you may view the video by opening"
+		prompt.Line3 = "it in your preferred software below."
+		prompt.Line4 = "thank you for using ytp+ studio and cli."
+		prompt.Line5 = ""
+		prompt.Choice1 = "open video"
+		prompt.Callback1 = function()
+			love.system.openURL(Data.Generate.Output)
+		end
+		prompt.Callback2 = function() end
+		prompt.Choice2 = "okay"
+		prompt.Y = -240
+		prompt.State = Enums.PromptOpen
+		Main.Prompt = prompt
+		return false
 	end
-	prompt.Callback2 = function() end
-	prompt.Choice2 = "okay"
+	prompt.Callback2 = function()
+		Main.NetStatus[1] = ""
+		love.window.requestAttention(true)
+		Audio.Error:play()
+		local prompt = {}
+		prompt.Title = "rendering failed"
+		prompt.Line1 = "make sure the previous video is"
+		prompt.Line2 = "not being played at this time."
+		prompt.Line3 = ""
+		prompt.Line4 = "feel free ask us on our discord"
+		prompt.Line5 = "for technical support if needed."
+		prompt.Choice1 = "open command.txt"
+		prompt.Callback1 = function()
+			love.system.openURL(love.filesystem.getSaveDirectory().."/command.txt")
+		end
+		prompt.Callback2 = function() end
+		prompt.Choice2 = "okay"
+		prompt.Y = -240
+		prompt.State = Enums.PromptOpen
+		Main.Prompt = prompt
+		return false
+	end
+	prompt.Choice2 = ""
 	prompt.Y = -240
 	prompt.State = Enums.PromptOpen
 	Main.Prompt = prompt

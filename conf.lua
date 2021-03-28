@@ -18,4 +18,5 @@ function love.conf(t)
     t.window.width = Enums.Width
     t.window.height = Enums.Height
     t.window.icon = "logo.png"
+    t.console = true
 end
