@@ -2,7 +2,7 @@ return {
     Version = {
         Major = 1,
         Minor = 3,
-        Patch = 0,
+        Patch = 1,
         Label = nil,
         Candidate = 0
     },

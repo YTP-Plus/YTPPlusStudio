@@ -1024,24 +1024,24 @@ function Render()
 			local endcmd = ""
 			if love.system.getOS() == "Windows" then
 				cwd = love.filesystem.getWorkingDirectory()
-				startcmd = "start /B \"ytp+ cli (DO NOT CLOSE)\" "
+				startcmd = "start /B \"\" "
 			elseif love.system.getOS() == "OS X" then
-				startcmd = "open "
+				--startcmd = "open "
 			elseif love.system.getOS() == "Linux" then
-				startcmd = "xdg-open "
+				--startcmd = "xdg-open "
 			end
-			local cmd = startcmd.."node \""..cwd.."/YTPPlusCLI/index.js\" --skip=true --width="..Data.Generate.Width.." --height="..Data.Generate.Height.." --fps="..Data.Generate.FPS.." --input=\""..love.filesystem.getSaveDirectory().."/videos.txt\" --output=\""..Data.Generate.Output.."\" --clips="..Data.Generate.Clips.." --minstream="..Data.Generate.MinStream.." --maxstream="..Data.Generate.MaxStream.." --transitions=\""..love.filesystem.getSaveDirectory().."/transitions.txt\""..endcmd
+			local cmd = "node \""..cwd.."/YTPPlusCLI/index.js\" --skip=true --width="..Data.Generate.Width.." --height="..Data.Generate.Height.." --fps="..Data.Generate.FPS.." --input=\""..love.filesystem.getSaveDirectory().."/videos.txt\" --output=\""..Data.Generate.Output.."\" --clips="..Data.Generate.Clips.." --minstream="..Data.Generate.MinStream.." --maxstream="..Data.Generate.MaxStream.." --transitions=\""..love.filesystem.getSaveDirectory().."/transitions.txt\""..endcmd
 			if Data.Generate.Debugging == true then
 				cmd = cmd.." --debug"
 			end
-			if Data.Generate.TransitionsActive == true then
+			if Data.Generate.TransitionsActive == true and #Data.Generate.Transitions > 0 then
 				cmd = cmd.." --usetransitions"
 			end
 			if Data.Generate.PluginTestActive == true then
 				cmd = cmd.." --plugintest="..Data.Generate.PluginTest
 			end
 			love.filesystem.write("command.txt", cmd)
-			os.execute(cmd)
+			os.execute(startcmd..cmd)
 			promptrendering()
 		end
 		prompt.Callback2 = function() end

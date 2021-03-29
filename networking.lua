@@ -2,18 +2,16 @@ require("lib/noobhub")
 
 local cwd = love.filesystem.getSaveDirectory()
 local startcmd = ""
-local endcmd = ""
 if love.system.getOS() == "Windows" then
 	cwd = love.filesystem.getWorkingDirectory()
-	startcmd = "start /B \"NoobHub Server (DO NOT CLOSE)\" "
-	endcmd = " /B"
+	startcmd = "start /B \"\" "
 elseif love.system.getOS() == "OS X" then
-	startcmd = "open "
+	--startcmd = "open "
 elseif love.system.getOS() == "Linux" then
-	startcmd = "xdg-open "
+	--startcmd = "xdg-open "
 end
-local cmd = startcmd.."node \""..cwd.."/YTPPlusCLI/lib/noobhub-server.js\""..endcmd
-os.execute(cmd)
+local cmd = "node \""..cwd.."/YTPPlusCLI/lib/noobhub-server.js\""
+os.execute(startcmd..cmd)
 
 -- connect to the server
 local hub = noobhub.new({ server = "localhost"; port = 1737; }); 
