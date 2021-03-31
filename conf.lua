@@ -1,7 +1,9 @@
 function love.conf(t)
+    love.filesystem.setIdentity("ytpplusstudio_1")
     local Enums = require("enums") --conf enums
-    local ver = Enums.Version.Major.."."..Enums.Version.Minor.."."..Enums.Version.Patch
-    if Enums.Version.Label ~= nil then ver = ver.."-"..Enums.Version.Label.."."..Enums.Version.Candidate end
+    local Data = require("data")
+    local ver = Data.Version.Major.."."..Data.Version.Minor.."."..Data.Version.Patch
+    if Data.Version.Label ~= nil then ver = ver.."-"..Data.Version.Label.."."..Data.Version.Candidate end
     local path = love.filesystem.getSource()
     local cli = ""
     love.filesystem.mount(love.filesystem.getSourceBaseDirectory(), "")
@@ -14,7 +16,6 @@ function love.conf(t)
     else
         t.window.title = "ytp+ studio "..cli
     end
-    love.filesystem.setIdentity("ytpplusstudio_"..Enums.Version.Major)
     t.window.width = Enums.Width
     t.window.height = Enums.Height
     t.window.icon = "logo.png"

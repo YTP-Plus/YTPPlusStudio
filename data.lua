@@ -36,4 +36,9 @@ for k,v in pairs(unpack) do data[k] = v end --combine data and unpack tables
 if data.Scaling < 1 then
     data.Scaling = 1
 end
+data.Version = {
+    Major = 1,
+    Minor = 3,
+    Patch = 2
+}
 return data

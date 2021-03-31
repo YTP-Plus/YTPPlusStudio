@@ -1030,7 +1030,7 @@ function Render()
 			elseif love.system.getOS() == "Linux" then
 				--startcmd = "xdg-open "
 			end
-			local cmd = "node \""..cwd.."/YTPPlusCLI/index.js\" --skip=true --width="..Data.Generate.Width.." --height="..Data.Generate.Height.." --fps="..Data.Generate.FPS.." --input=\""..love.filesystem.getSaveDirectory().."/videos.txt\" --output=\""..Data.Generate.Output.."\" --clips="..Data.Generate.Clips.." --minstream="..Data.Generate.MinStream.." --maxstream="..Data.Generate.MaxStream.." --transitions=\""..love.filesystem.getSaveDirectory().."/transitions.txt\""..endcmd
+			local cmd = "node \""..cwd.."/YTPPlusCLI/index.js\" --cwd \""..cwd.."/YTPPlusCLI/\" --skip=true --width="..Data.Generate.Width.." --height="..Data.Generate.Height.." --fps="..Data.Generate.FPS.." --input=\""..love.filesystem.getSaveDirectory().."/videos.txt\" --output=\""..Data.Generate.Output.."\" --clips="..Data.Generate.Clips.." --minstream="..Data.Generate.MinStream.." --maxstream="..Data.Generate.MaxStream.." --transitions=\""..love.filesystem.getSaveDirectory().."/transitions.txt\""..endcmd
 			if Data.Generate.Debugging == true then
 				cmd = cmd.." --debug"
 			end
