@@ -1,3 +1,6 @@
+function getPath(str)
+    return str:match("(.*[/\\])")
+end
 function love.load()
 	Networking = require("networking")
 	utf8 = require("utf8")
@@ -1023,7 +1026,7 @@ function Render()
 			local startcmd = ""
 			local endcmd = ""
 			if love.system.getOS() == "Windows" then
-				cwd = love.filesystem.getWorkingDirectory()
+				cwd = getPath(love.filesystem.getSource())
 				startcmd = "start /B \"\" "
 			elseif love.system.getOS() == "OS X" then
 				--startcmd = "open "
@@ -1155,7 +1158,7 @@ function promptplugins()
 	prompt.Line5 = ""
 	prompt.Choice1 = "open ytppluscli/plugins/"
 	prompt.Callback1 = function()
-		love.system.openURL(love.filesystem.getWorkingDirectory().."/YTPPlusCLI/plugins")
+		love.system.openURL(getPath(love.filesystem.getSource()).."/YTPPlusCLI/plugins")
 	end
 	prompt.Callback2 = function() end
 	prompt.Choice2 = "okay"
